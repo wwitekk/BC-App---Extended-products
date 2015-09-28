@@ -28,3 +28,4 @@ Use tags: `{{product.custom4}}, {{product.custom5}}, {{product.custom5}}` in you
 That was not used in production. Need:
 - Code cleaning
 - Tests, tests, tests
+- Any info: issues, bugs, suggestions - welcome
