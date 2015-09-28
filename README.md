@@ -1,6 +1,6 @@
 # BC-App - Extended products
 
-In case if 3 standard custom fields are not enough
+In case if 3 standard custom fields are not enough.
 
 ## Installing
 
@@ -23,3 +23,8 @@ At the top of the page enter Liquid code:
 ```
 
 Use tags: `{{ep.custom4}}, {{ep.custom5}}, {{ep.custom5}}` in your code.
+
+##Note
+That was not used in production. Need:
+- Code cleaning
+- Tests, tests, tests
