@@ -1,4 +1,4 @@
-# BC-App - Extended-products
+# BC-App - Extended products
 
 In case if 3 standard custom fields are not enough
 
