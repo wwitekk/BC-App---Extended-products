@@ -17,12 +17,12 @@ At the top of the page enter Liquid code:
 {module_json json="products.json" render="collection" collection="extended" template=""}
 {% for item in extended.products %}
 	{% if item.id == globals.get.ProductID -%}
-		{% assign ep = item %}
+		{% assign product = item %}
 	{% endif -%}
 {% endfor %}
 ```
 
-Use tags: `{{ep.custom4}}, {{ep.custom5}}, {{ep.custom5}}` in your code.
+Use tags: `{{product.custom4}}, {{product.custom5}}, {{product.custom5}}` in your code.
 
 ##Note
 That was not used in production. Need:
