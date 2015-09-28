@@ -1,0 +1,9 @@
+{
+  "menu-first-ue-chris-Extended-Products": {
+      "weight": 100000,
+      "title": "Extended Products",
+      "attr": {
+          "href": "/Admin/AppLoader.aspx?client_id=ue-chris-Extended-Products"
+      }
+  }
+}
