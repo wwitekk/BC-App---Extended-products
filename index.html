@@ -3,27 +3,15 @@
  
 <head>
 	<title>Extended product</title>
+
+	<link rel="stylesheet" href="_assets/css/main.css" />
+
     <script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.3.1/jquery.cookie.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.1/underscore-min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
     <script type="text/javascript" src="//cdn.worldsecuresystems.com/bcapi/bcapi-0.1.0.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular.min.js"></script>
-	
-	<style type="text/css">
-		.root {color: #595959; font-size: 12px; line-height: 16px; font-family: 'Lucida Grande', Helvetica, Arial, Verdana, sans-serif;
-			padding: 0; width: 90%;}
-    	.root, 
-    	input {font-size: 12px; line-height: 16px; font-family: 'Lucida Grande', Helvetica, Arial, Verdana, sans-serif;}
-    	.root li {display: inline-table; width: 100%; height: 14px; padding: 4px 8px;}
-		.root span,
-		.root input {float: left; display: block; width: 23%; height: 100%; margin: 0 5px;}
-		.root input[type="checkbox"]{width: 20px; height: 20px;}
-		.root a {color: #1E86E3;}
-		.header {color: #333; background: #dbdbdb; font-weight: bold; }
-		li:nth-child(even){ background: #f2f2f2; }
-		.message-success {background: #d8fb9c; padding: 20px;}
-    </style>
+
 </head>
  
 <body ng-controller="ProductsCtr">
@@ -51,147 +39,9 @@
 
 	<a href="#" id="js-save-changes" ng-click="saveChanges()">Save changes</a>
 
-<script type="text/javascript">
-
-function ShortCatalogue(id, name, custom4, custom5, custom6){
-	this.id = id;
-	this.name = name;
-	this.custom4 = custom4;
-	this.custom5 = custom5;
-	this.custom6 = custom6;
-}
-
-var getXMLProductsList = function(parentId){
-	var siteId = 2211632,
-		serviceUrl = 'https://ue-chris-extended-products-' +  siteId + '-apps.worldsecuresystems.com/catalystwebservice/catalystecommercewebservice.asmx',
-		access_token = BCAPI.Helper.Site.getAccessToken(),
-	 	soapQuery = '<?xml version="1.0" encoding="utf-8"?>'+
-		'<soapenv:Envelope ' +
-			'xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" ' +
-			'xmlns:cat="http://tempuri.org/CatalystDeveloperService/CatalystEcommerceWebservice">'+
-		   '<soapenv:Header/>'+
-		   '<soapenv:Body>'+
-		      '<cat:Product_ListRetrieve>'+
-		         '<cat:Username></cat:Username>'+
-		         '<cat:Password>' + access_token + '</cat:Password>'+
-		         '<cat:SiteId>' + siteId + '</cat:SiteId>'+
-		         '<cat:CatalogueId>' +  parentId + '</cat:CatalogueId>'+
-		      '</cat:Product_ListRetrieve>'+
-		   '</soapenv:Body>'+
-		'</soapenv:Envelope>';
-
-	var request = new XMLHttpRequest();
-	request.open("POST", serviceUrl, false);
-	request.setRequestHeader('Content-Type','text/xml');
-	request.setRequestHeader('SOAPAction','http://tempuri.org/CatalystDeveloperService/CatalystEcommerceWebservice/Product_ListRetrieve');
-	request.send(soapQuery);
-	
-	var xmlDoc = request.responseXML;
-	
-	return xmlDoc;
-};
-
-var xmlProductToJson = function(XMLcatalogue){
-	var id = XMLcatalogue.find('productId').text(),
-		name = XMLcatalogue.find('productName').text();
-
-	return new ShortCatalogue(id, name, '', '', '');
-};
-
-var getProductsList = function(parentId){
-	var id = (parentId || -1), //-1 rootid
-		xmlDoc = getXMLProductsList(id),
-		$xml = $( xmlDoc ),
-  		$products = $xml.find( "Products" ),
-  		products = [];
-
-	$products.each(function(){
-		var $product = $(this);
-		products.push(xmlProductToJson($product));
-	});
-
-	return products;
-};
-
-var getFileList = function(){
-	var filename = '/products.json',
-		products = [];
-	$.ajaxSetup( { "async": false } );
-	products = $.getJSON(filename);
-	$.ajaxSetup( { "async": true } );
-	var result = products.responseJSON.products;
-
-	return result.length > 0 ? result : [];
-};
-
-var getFullBCList = function(){
-	var products = getProductsList();	//initialize
-	
-	$.each(products, function(index, value){
-		var children = getProductsList(value.id),
-			parentPath = value.path,
-			hasChildren = (children.length > 0);
-
-		if(hasChildren){  
-			for(var i = 0; i < children.length; ++i)
-			{
-				var child = children[i];
-				child.path = parentPath + ' > ' + child.path; // create path
-				products.splice(index + 1 + i, 0, child);		//this line is core for the function
-			}
-		}
-	});
-	return products;
-};
-
-var mergeArrays = function(BCitems, FileItems){
-	var result = [];
-	$.each(BCitems, function(i, item){
-		var fileItem = $.grep(FileItems, function(fi){
-				return fi.id == item.id;
-		})[0];
-		
-		if(fileItem != null){
-			item.custom4 = fileItem.custom4;
-			item.custom5 = fileItem.custom5;
-			item.custom6 = fileItem.custom6;
-		}
-		result.push(item);
-	});
-	return result;
-};
-
-var ProductsCtr = function($scope){
-	var bcProducts = getProductsList(),
-		fileProducts = getFileList(),
-		result = mergeArrays(bcProducts, fileProducts);
-
-	$scope.items = result;
-	$scope.showTrigger = false;
-	$scope.i = 0;
-
-	$scope.filterFunction = function(element) {
-	    return element.path.match(/^Ma/) ? true : false;
-	};
-
-	$scope.saveChanges = function(){
-		var filename = 'products.json',
-			f = new BCAPI.Models.FileSystem.File(filename);
-			f.upload(JSON.stringify({products: $scope.items})).done(function(){
-				console.log('Success!');
-				$scope.showTrigger = true;
-			}).error(function(){
-				console.log("Request failed.");
-			    console.log("Error code: " + jqXHR.status);
-			    console.log("Error text: " + jqXHR.statusText);
-			    console.log("Response text: " + jqXHR.responseText);
-			});
-	};
-};
-
-	
-</script>
-
+    
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.18/angular.min.js"></script>
+	<script src="_assets/js/app.js"></script>
 
 </body>
 </html>
